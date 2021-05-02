@@ -1,8 +1,12 @@
-
-
 use proc_macro::TokenStream;
 use syn::{BinOp, Expr};
 use quote::quote;
+
+macro_rules! error {
+    ($msg:expr) => {
+        quote::quote! { compile_error!($msg) }.into()
+    };
+}
 
 #[derive(Debug)]
 enum Wrap<'a> {
@@ -11,16 +15,16 @@ enum Wrap<'a> {
 }
 
 impl Wrap<'_> {
-    fn expr(&self) -> &Expr {
+    fn expr(&self) -> Result<&Expr, TokenStream> {
         match self {
-            Wrap::Exprs(e) => e,
-            Wrap::Sig(_) => panic!()
+            Wrap::Exprs(e) => Ok(e),
+            Wrap::Sig(_) => Err(error!("Expected expr"))
         }
     }
-    fn sig(&self) -> &BinOp {
+    fn sig(&self) -> Result<&BinOp, TokenStream> {
         match self {
-            Wrap::Exprs(_) => panic!(),
-            Wrap::Sig(s) => s
+            Wrap::Exprs(_) => Err(error!("Expected op")),
+            Wrap::Sig(s) => Ok(s)
         }
     }
 }
@@ -44,17 +48,39 @@ fn extract(expr: &Expr) -> Vec<Wrap> {
     }
 }
 
+macro_rules! expr {
+    ($e:expr) => {
+        match $e.expr() {
+            Ok(x) => x,
+            Err(e) => return e
+        }
+    };
+}
+
+macro_rules! op {
+    ($e:expr) => {
+        match $e.sig() {
+            Ok(x) => x,
+            Err(e) => return e
+        }
+    };
+}
+
 #[proc_macro]
 pub fn between(input: TokenStream) -> TokenStream {
     let ast: Expr = syn::parse(input).unwrap();
 
     let sig = extract(&ast);
 
-    let min = sig[0].expr();
-    let op1 = sig[1].sig();
-    let var = sig[2].expr();
-    let op2 = sig[3].sig();
-    let max = sig[4].expr();
+    if sig.len() != 5 {
+        return error!("Not enough tokens")
+    }
+
+    let min = expr!(sig[0]);
+    let op1 = op!(sig[1]);
+    let var = expr!(sig[2]);
+    let op2 = op!(sig[3]);
+    let max = expr!(sig[4]);
 
     let quote = quote! {
         #min #op1 #var && #var #op2 #max
