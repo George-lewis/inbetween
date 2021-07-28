@@ -21,5 +21,7 @@ mod tests {
         assert_eq!(between!(0 > c > 0), false);
 
         assert_eq!(between!(10 <= c < 11), true);
+        assert_eq!(between!(10 <= c < 10), true);
+        assert_eq!(between!(12 <= c == 11), true);
     }
 }
