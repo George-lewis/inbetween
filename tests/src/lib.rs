@@ -1,10 +1,15 @@
 #[cfg(test)]
 mod tests {
     use inbetween::between;
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+
+    fn random() -> u8 {
+        55
     }
+
+    struct Container {
+        inner: u8
+    }
+
     #[test]
     fn test() {
         assert_eq!(between!(0 < 1 < 2), true);
@@ -23,5 +28,13 @@ mod tests {
         assert_eq!(between!(10 <= c < 11), true);
         assert_eq!(between!(10 <= c < 10), true);
         assert_eq!(between!(12 <= c == 11), true);
+
+        assert_eq!(between!(0 < random() < 66), true);
+
+        let con = Container {
+            inner: 9
+        };
+
+        assert_eq!(between!(0 < con.inner < 10), true);
     }
 }
