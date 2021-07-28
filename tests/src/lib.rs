@@ -19,5 +19,7 @@ mod tests {
 
         let c = 10;
         assert_eq!(between!(0 > c > 0), false);
+
+        assert_eq!(between!(10 <= c < 11), true);
     }
 }
