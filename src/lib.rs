@@ -38,7 +38,7 @@ fn extract(expr: &Expr) -> Vec<Wrap> {
             v.extend(extract(eb.right.as_ref()));
             v
         }
-        Expr::Lit(_) | Expr::Path(_) => {
+        Expr::Lit(_) | Expr::Path(_) | Expr::Field(_) | Expr::Call(_) => {
             vec![Wrap::Exprs(expr)]
         }
         Expr::MethodCall(emc) => {
@@ -72,8 +72,12 @@ pub fn between(input: TokenStream) -> TokenStream {
 
     let sig = extract(&ast);
 
-    if sig.len() != 5 {
+    if sig.len() < 5 {
         return error!("Not enough tokens")
+    }
+
+    if sig.len() > 5 {
+        return error!("Too many tokens")
     }
 
     let min = expr!(sig[0]);
