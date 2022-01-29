@@ -1,4 +1,8 @@
-#![allow(clippy::bool_assert_comparison, clippy::nonminimal_bool, clippy::manual_range_contains)]
+#![allow(
+    clippy::bool_assert_comparison,
+    clippy::nonminimal_bool,
+    clippy::manual_range_contains
+)]
 
 use inbetween::between;
 
@@ -7,7 +11,7 @@ fn random() -> u8 {
 }
 
 struct Container {
-    inner: u8
+    inner: u8,
 }
 
 impl Container {
@@ -24,7 +28,7 @@ fn test() {
 
     let c = 10;
     assert_eq!(between!(0 < c > 3), true);
-    
+
     assert_eq!(between!(0 < 0 < 1), false);
     assert_eq!(between!(0 > 1 > 0), false);
 
@@ -37,9 +41,7 @@ fn test() {
 
     assert_eq!(between!(0 < random() < 66), true);
 
-    let con = Container {
-        inner: 9
-    };
+    let con = Container { inner: 9 };
 
     assert_eq!(between!(0 < con.inner < 10), true);
 

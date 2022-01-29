@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
-use syn::{BinOp, Expr};
 use quote::quote;
+use syn::{BinOp, Expr};
 
 macro_rules! error {
     ($msg:expr) => {
@@ -11,20 +11,20 @@ macro_rules! error {
 #[derive(Debug)]
 enum Wrap<'a> {
     Exprs(&'a Expr),
-    Sig(BinOp)
+    Sig(BinOp),
 }
 
 impl Wrap<'_> {
     fn expr(&self) -> Result<&Expr, TokenStream> {
         match self {
             Wrap::Exprs(e) => Ok(e),
-            Wrap::Sig(_) => Err(error!("Expected expr"))
+            Wrap::Sig(_) => Err(error!("Expected expr")),
         }
     }
     fn sig(&self) -> Result<&BinOp, TokenStream> {
         match self {
             Wrap::Exprs(_) => Err(error!("Expected op")),
-            Wrap::Sig(s) => Ok(s)
+            Wrap::Sig(s) => Ok(s),
         }
     }
 }
@@ -41,10 +41,8 @@ fn extract(expr: &Expr) -> Vec<Wrap> {
         Expr::Lit(_) | Expr::Path(_) | Expr::Field(_) | Expr::Call(_) => {
             vec![Wrap::Exprs(expr)]
         }
-        Expr::MethodCall(emc) => {
-            extract(emc.receiver.as_ref())
-        }
-        _ => vec![]
+        Expr::MethodCall(emc) => extract(emc.receiver.as_ref()),
+        _ => vec![],
     }
 }
 
@@ -52,7 +50,7 @@ macro_rules! expr {
     ($e:expr) => {
         match $e.expr() {
             Ok(x) => x,
-            Err(e) => return e
+            Err(e) => return e,
         }
     };
 }
@@ -61,7 +59,7 @@ macro_rules! op {
     ($e:expr) => {
         match $e.sig() {
             Ok(x) => x,
-            Err(e) => return e
+            Err(e) => return e,
         }
     };
 }
@@ -73,11 +71,11 @@ pub fn between(input: TokenStream) -> TokenStream {
     let sig = extract(&ast);
 
     if sig.len() < 5 {
-        return error!("Not enough tokens")
+        return error!("Not enough tokens");
     }
 
     if sig.len() > 5 {
-        return error!("Too many tokens")
+        return error!("Too many tokens");
     }
 
     let min = expr!(sig[0]);
